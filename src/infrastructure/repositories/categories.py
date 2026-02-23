@@ -12,10 +12,21 @@ async def create_category(session: AsyncSession, name: str, type_: str) -> dict:
     )
     result = await session.execute(stmt)
     await session.commit()
-    row = result.mappings().one()  # гарантированно не None, либо будет exception
+    row = result.mappings().one()  
     return dict(row)
 
 async def get_categories(session: AsyncSession):
     stmt = select(Categories)
     result = await session.execute(stmt)
     return result.fetchall()
+
+async def get_category_by_id(session: AsyncSession, category_id: int) -> dict | None:
+    stmt = select (
+        Categories.c.id, 
+        Categories.c.name, 
+        Categories.c.type, 
+    ).where(Categories.c.id == category_id)
+
+    result = await session.execute(stmt)
+    row = result.mappings().one_or_none()
+    return dict(row) if row else None 
