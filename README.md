@@ -1,4 +1,5 @@
 # test_project
-uvicorn src.main:app --reload
+## Запуск проекта
 
-для запуска
+```bash
+docker compose up --build
