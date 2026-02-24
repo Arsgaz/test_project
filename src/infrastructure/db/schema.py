@@ -31,7 +31,7 @@ Categories = Table (
     Column("created_at", DateTime(timezone = True), server_default=func.now(), nullable = False)
 )
 
-transcaction = Table(
+transactions = Table(
     "transactions", 
     metadata, 
     Column("id", Integer, primary_key=True),

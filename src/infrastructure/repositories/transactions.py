@@ -1,7 +1,7 @@
 from sqlalchemy import insert, select 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.infrastructure.db.schema import transcaction 
+from src.infrastructure.db.schema import transactions
 
 async def create_transaction (
         session: AsyncSession, 
@@ -11,14 +11,14 @@ async def create_transaction (
         category_id: int 
 ) -> dict: 
     stmt = (
-        insert(transcaction)
+        insert(transactions)
         .values(type = type_, amount = amount, date = date_, category_id = category_id)
         .returning (
-            transcaction.c.id,
-            transcaction.c.type,
-            transcaction.c.amount, 
-            transcaction.c.date, 
-            transcaction.c.category_id,
+            transactions.c.id,
+            transactions.c.type,
+            transactions.c.amount, 
+            transactions.c.date, 
+            transactions.c.category_id,
         )
     )
     result = await session.execute(stmt)
@@ -27,12 +27,12 @@ async def create_transaction (
     
 async def get_transactions(session: AsyncSession) -> list[dict]:
     stmt = select(
-        transcaction.c.id,
-            transcaction.c.type,
-            transcaction.c.amount, 
-            transcaction.c.date, 
-            transcaction.c.category_id,
-    ).order_by(transcaction.c.id.desc())
+        transactions.c.id,
+            transactions.c.type,
+            transactions.c.amount, 
+            transactions.c.date, 
+            transactions.c.category_id,
+    ).order_by(transactions.c.id.desc())
 
     result = await session.execute(stmt)
     return [dict(r) for r in result.mappings().all()]
