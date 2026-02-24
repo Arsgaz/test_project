@@ -14,7 +14,7 @@ async def create(data: TransactionCreate, session: AsyncSession = Depends(get_db
     try:
         return await create_transaction_use_case(
             session=session,
-            type_=data.type.value,
+            transaction_type_id=data.transaction_type_id,
             amount=data.amount,
             date_=data.date,
             category_id=data.category_id,
