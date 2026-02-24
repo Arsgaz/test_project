@@ -8,7 +8,7 @@ class TransactionType(str, Enum):
     expense = "expense"
 
 class TransactionCreate(BaseModel):
-    transaction_type_id: int
+    type: TransactionType
     amount: float = Field(gt=0)
     date: date 
     category_id: int 
