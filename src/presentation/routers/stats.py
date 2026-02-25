@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession 
 
-from src.infrastructure.db.deps import get_db_session
-from src.application.services.stats import get_summary_use_case
+from src.di.providers import get_summary_uc
 
-router = APIRouter(prefix="/stats", tags = ["stats"])
+router = APIRouter(prefix="/stats", tags=["stats"])
+
 
 @router.get("/summary")
-async def summary(session: AsyncSession = Depends(get_db_session)): 
-    return await get_summary_use_case(session)
+async def summary(uc=Depends(get_summary_uc)):
+    return await uc()
