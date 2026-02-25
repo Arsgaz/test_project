@@ -1,21 +1,22 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException
 
-from src.infrastructure.db.deps import get_db_session
-from src.infrastructure.repositories.categories import (
-    create_category,
-    get_categories,
-)
+from src.di.providers import get_create_category_uc, get_list_categories_uc
 from src.schemas.categories import CategoryCreate, CategoryRead
 
 router = APIRouter(prefix="/categories", tags=["categories"])
 
 
 @router.post("/", response_model=CategoryRead)
-async def create(data: CategoryCreate, session: AsyncSession = Depends(get_db_session)):
-    return await create_category(session, data.name, data.type)
+async def create(data: CategoryCreate, uc=Depends(get_create_category_uc)):
+    try:
+        return await uc(
+            name=data.name,
+            type_=data.type.value if hasattr(data.type, "value") else data.type,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/", response_model=list[CategoryRead])
-async def list_categories(session: AsyncSession = Depends(get_db_session)):
-    return await get_categories(session)
+async def list_categories(uc=Depends(get_list_categories_uc)):
+    return await uc()
