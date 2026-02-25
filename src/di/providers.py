@@ -7,6 +7,9 @@ from src.infrastructure.repositories.transactions import TransactionsRepo
 from src.infrastructure.repositories.categories import CategoriesRepo
 from src.infrastructure.repositories.transaction_types import TransactionTypesRepo
 
+from src.infrastructure.repositories.stats import StatsRepo
+from src.application.services.stats import GetSummaryUseCase
+
 from src.application.services.transactions import (
     CreateTransactionUseCase,
     ListTransactionsUseCase,
@@ -35,6 +38,11 @@ def get_transaction_types_repo(
     session: AsyncSession = Depends(get_db_session),
 ) -> TransactionTypesRepo:
     return TransactionTypesRepo(session)
+
+def get_stats_repo(
+    session: AsyncSession = Depends(get_db_session),
+) -> StatsRepo:
+    return StatsRepo(session)
 
 
 # TRANSACTIONS USE CASES
@@ -65,3 +73,10 @@ def get_list_categories_uc(
     categories_repo: CategoriesRepo = Depends(get_categories_repo),
 ) -> ListCategoriesUseCase:
     return ListCategoriesUseCase(categories_repo)
+
+#STATS USE CASES 
+
+def get_summary_uc(
+    stats_repo: StatsRepo = Depends(get_stats_repo),
+) -> GetSummaryUseCase:
+    return GetSummaryUseCase(stats_repo)

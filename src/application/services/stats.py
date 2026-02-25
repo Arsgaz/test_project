@@ -1,6 +1,6 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.infrastructure.repositories.stats import get_summary 
+class GetSummaryUseCase:
+    def __init__(self, stats_repo):
+        self._stats = stats_repo
 
-async def get_summary_use_case(session: AsyncSession) -> dict:
-    return await get_summary(session)
- 
+    async def __call__(self) -> dict:
+        return await self._stats.get_summary()
