@@ -11,7 +11,7 @@ async def create(data: CategoryCreate, uc=Depends(get_create_category_uc)):
     try:
         return await uc(
             name=data.name,
-            type_=data.type.value if hasattr(data.type, "value") else data.type,
+            transaction_type_id=data.transaction_type_id,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

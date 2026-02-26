@@ -57,8 +57,9 @@ def get_list_transactions_uc(
 
 def get_create_category_uc(
     categories_repo: CategoriesRepo = Depends(get_categories_repo),
+    transaction_types_repo: TransactionTypesRepo = Depends(get_transaction_types_repo),
 ) -> CreateCategoryUseCase:
-    return CreateCategoryUseCase(categories_repo)
+    return CreateCategoryUseCase(categories_repo, transaction_types_repo)
 
 
 def get_list_categories_uc(
