@@ -1,19 +1,21 @@
 class CreateCategoryUseCase:
-    def __init__(self, categories_repo):
+    def __init__(self, categories_repo, transaction_types_repo):
         self._categories = categories_repo
+        self._types = transaction_types_repo
 
-    async def __call__(self, *, name: str, type_: str) -> dict:
+    async def __call__(self, *, name: str, transaction_type_id: int) -> dict:
         name = name.strip()
         if not name:
             raise ValueError("Name is required")
 
-        # минимальная бизнес-валидация
-        if type_ not in ("income", "expense"):
-            raise ValueError("Invalid category type")
+        # бизнес-валидация: тип должен существовать (чтобы не ловить 500 от FK)
+        tx_type = await self._types.get_by_id(transaction_type_id)
+        if tx_type is None:
+            raise ValueError("Transaction type not found")
 
         return await self._categories.create(
             name=name,
-            type_=type_,
+            transaction_type_id=transaction_type_id,
         )
 
 
