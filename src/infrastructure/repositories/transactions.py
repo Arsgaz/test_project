@@ -1,38 +1,74 @@
-from sqlalchemy import insert, select 
+from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.infrastructure.db.schema import transcaction 
+from src.infrastructure.db.schema import transactions, transaction_types
 
-async def create_transaction (
-        session: AsyncSession, 
-        type_: str, 
-        amount: float, 
-        date_, 
-        category_id: int 
-) -> dict: 
-    stmt = (
-        insert(transcaction)
-        .values(type = type_, amount = amount, date = date_, category_id = category_id)
-        .returning (
-            transcaction.c.id,
-            transcaction.c.type,
-            transcaction.c.amount, 
-            transcaction.c.date, 
-            transcaction.c.category_id,
-        )
-    )
-    result = await session.execute(stmt)
-    await session.commit()
-    return dict(result.mappings().one())
+
+class TransactionsRepo:
+    def __init__(self, session: AsyncSession):
+        self._session = session
     
-async def get_transactions(session: AsyncSession) -> list[dict]:
-    stmt = select(
-        transcaction.c.id,
-            transcaction.c.type,
-            transcaction.c.amount, 
-            transcaction.c.date, 
-            transcaction.c.category_id,
-    ).order_by(transcaction.c.id.desc())
+    async def create(
+        self,
+        *,
+        transaction_type_id: int,
+        amount,
+        date_,
+        category_id: int,
+    ) -> dict:
 
-    result = await session.execute(stmt)
-    return [dict(r) for r in result.mappings().all()]
+        insert_stmt = (
+            insert(transactions)
+            .values(
+                transaction_type_id=transaction_type_id,
+                amount=amount,
+                date=date_,
+                category_id=category_id,
+            )
+            .returning(transactions.c.id)
+        )
+
+        res = await self._session.execute(insert_stmt)
+        new_id = res.scalar_one()
+        await self._session.commit()
+
+        select_stmt = (
+            select(
+                transactions.c.id,
+                transaction_types.c.code.label("type"),
+                transactions.c.amount,
+                transactions.c.date,
+                transactions.c.category_id,
+            )
+            .select_from(
+                transactions.join(
+                    transaction_types,
+                    transactions.c.transaction_type_id == transaction_types.c.id,
+                )
+            )
+            .where(transactions.c.id == new_id)
+        )
+
+        res = await self._session.execute(select_stmt)
+        return dict(res.mappings().one())
+
+    async def list(self) -> list[dict]:
+        stmt = (
+            select(
+                transactions.c.id,
+                transaction_types.c.code.label("type"),
+                transactions.c.amount,
+                transactions.c.date,
+                transactions.c.category_id,
+            )
+            .select_from(
+                transactions.join(
+                    transaction_types,
+                    transactions.c.transaction_type_id == transaction_types.c.id,
+                )
+            )
+            .order_by(transactions.c.id.desc())
+        )
+
+        result = await self._session.execute(stmt)
+        return [dict(r) for r in result.mappings().all()]
