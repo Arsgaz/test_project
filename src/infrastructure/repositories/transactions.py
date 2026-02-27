@@ -7,7 +7,7 @@ from src.infrastructure.db.schema import transactions, transaction_types
 class TransactionsRepo:
     def __init__(self, session: AsyncSession):
         self._session = session
-    
+
     async def create(
         self,
         *,
@@ -30,7 +30,9 @@ class TransactionsRepo:
 
         res = await self._session.execute(insert_stmt)
         new_id = res.scalar_one()
-        await self._session.commit()
+
+        # вместо commit
+        await self._session.flush()
 
         select_stmt = (
             select(

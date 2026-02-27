@@ -15,12 +15,18 @@ class TransactionCreate(BaseModel):
     )
     amount: float = Field(gt=0)
     date: date 
-    category_id: int 
+    category_id: int = Field(
+    ...,
+    description="номер категории"
+    )
 
 class TransactionRead(BaseModel):
     id: int 
     type: TransactionType 
     amount: float 
     date: date 
-    category_id: int 
+    category_id: int = Field(
+    ...,
+    description="номер категории"
+    )
 

@@ -15,9 +15,12 @@ class CategoriesRepo:
             .values(name=name, transaction_type_id=transaction_type_id)
             .returning(Categories.c.id)
         )
+
         res = await self._session.execute(insert_stmt)
         new_id = res.scalar_one()
-        await self._session.commit()
+
+        # ⚠️ ВАЖНО: flush вместо commit
+        await self._session.flush()
 
         # 2) select + join -> красивый ответ
         select_stmt = (
@@ -35,6 +38,7 @@ class CategoriesRepo:
             )
             .where(Categories.c.id == new_id)
         )
+
         res = await self._session.execute(select_stmt)
         return dict(res.mappings().one())
 
@@ -54,6 +58,7 @@ class CategoriesRepo:
             )
             .order_by(Categories.c.id.desc())
         )
+
         res = await self._session.execute(stmt)
         return [dict(r) for r in res.mappings().all()]
 
@@ -73,6 +78,7 @@ class CategoriesRepo:
             )
             .where(Categories.c.id == category_id)
         )
+
         res = await self._session.execute(stmt)
         row = res.mappings().one_or_none()
         return dict(row) if row else None

@@ -19,6 +19,12 @@ from src.application.services.categories import (
     ListCategoriesUseCase,
 )
 
+from src.infrastructure.db.uow import UnitOfWork
+from src.infrastructure.db.session import SessionFactory
+
+
+def get_uow() -> UnitOfWork:
+    return UnitOfWork(SessionFactory)
 
 #REPOS
 
@@ -48,32 +54,29 @@ def get_stats_repo(
 # TRANSACTIONS USE CASES
 
 def get_create_transaction_uc(
-    transactions_repo: TransactionsRepo = Depends(get_transactions_repo),
-    categories_repo: CategoriesRepo = Depends(get_categories_repo),
-    transaction_types_repo: TransactionTypesRepo = Depends(get_transaction_types_repo),
+    uow: UnitOfWork = Depends(get_uow),
 ) -> CreateTransactionUseCase:
-    return CreateTransactionUseCase(transactions_repo, categories_repo, transaction_types_repo)
+    return CreateTransactionUseCase(uow)
 
 
 def get_list_transactions_uc(
-    transactions_repo: TransactionsRepo = Depends(get_transactions_repo),
+    uow: UnitOfWork = Depends(get_uow),
 ) -> ListTransactionsUseCase:
-    return ListTransactionsUseCase(transactions_repo)
+    return ListTransactionsUseCase(uow)
 
 
 #CATEGORIES USE CASES
 
 def get_create_category_uc(
-    categories_repo: CategoriesRepo = Depends(get_categories_repo),
-    transaction_types_repo: TransactionTypesRepo = Depends(get_transaction_types_repo),
+    uow: UnitOfWork = Depends(get_uow),
 ) -> CreateCategoryUseCase:
-    return CreateCategoryUseCase(categories_repo, transaction_types_repo)
+    return CreateCategoryUseCase(uow)
 
 
 def get_list_categories_uc(
-    categories_repo: CategoriesRepo = Depends(get_categories_repo),
+    uow: UnitOfWork = Depends(get_uow),
 ) -> ListCategoriesUseCase:
-    return ListCategoriesUseCase(categories_repo)
+    return ListCategoriesUseCase(uow)
 
 #STATS USE CASES 
 

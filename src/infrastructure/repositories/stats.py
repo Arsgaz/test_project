@@ -41,8 +41,8 @@ class StatsRepo:
         result = await self._session.execute(stmt)
         row = result.mappings().one()
 
-        total_income = float(row["total_income"])
-        total_expense = float(row["total_expense"])
+        total_income = float(row["total_income"] or 0)
+        total_expense = float(row["total_expense"] or 0)
 
         return {
             "total_income": total_income,
